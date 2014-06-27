@@ -1,4 +1,4 @@
 angular
 =======
 
-Various angular componenets
+Various angular components
