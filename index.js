@@ -1,6 +1,5 @@
 'use strict';
 
-
 window.doubleConfirmController = function($scope, $modalInstance, confirmCancel) {
   $scope.step = 0;
   $scope.state = null;
@@ -38,3 +37,27 @@ window.doubleConfirmController = function($scope, $modalInstance, confirmCancel)
     $modalInstance.close('cancel');
   };
 };
+
+angular.module ('hers.angular',['ui.bootstrap.modal', 'dialogs']).
+factory ('hers.messages',  function ($modal) {
+  function SimpleController($scope, $modalInstance, data) {
+    $scope.data = data;
+    $scope.close = function () {
+      $modalInstance.dismiss();
+    };
+  }
+  return {
+    notify: function (templateUrl, size, data) {
+      size = size || 'sm';
+      $modal.open ({
+        templateUrl: templateUrl,
+        controller: SimpleController,
+        size:size,
+        backdrop:'static',
+        resolve: {
+          data: function () {return data;}
+        }
+      });
+    }
+  };
+});
