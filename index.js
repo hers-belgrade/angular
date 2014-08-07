@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module ('hers.angular',['ui.bootstrap.modal']).
+angular.module ('hers.angular',['ui.bootstrap.modal', 'hers.angular.crud']).
 factory ('doubleConfirm', [function () {
   return function($scope, $modalInstance, confirmCancel) {
     $scope.step = 0;
