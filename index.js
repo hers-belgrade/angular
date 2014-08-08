@@ -60,6 +60,7 @@ factory ('doubleConfirm', [function () {
 }])
 .factory('hers.angular.notifications', ['$modal','hers.angular.notifications.defaults', function ($modal, defaults) {
 
+  var REGISTRY = {};
   var LABELS = {
     'error': 'Error',
     'warining': 'Warning',
@@ -74,47 +75,54 @@ factory ('doubleConfirm', [function () {
     'success':'success'
   };
 
-  function Controller($scope, $modalInstance, type, data, body_url, label) {
-    $scope.type = type;
+  function Controller($scope, $modalInstance, data, settings) {
     $scope.data = data;
-    $scope.getBodyUrl = function () {return body_url;};
-    $scope.label = label;
-    $scope.tc = cmap[type] || type;
+    $scope.settings = angular.extend({
+      label: LABELS[settings.type]
+    }, settings);
+    $scope.tc = cmap[settings.type] || settings.type;
 
     $scope.ok = function () {
       $modalInstance.dismiss('ok');
     }
   }
-
-  function launch (label, type, body_url, data, config) {
-    var c = angular.extend({}, defaults.get(), config);
+  
+  function launch (id, data) {
+    var settings = REGISTRY[id];
+    var c = angular.extend({}, defaults.get(), settings.modal);
     c.controller = Controller;
 
     c.resolve = {
-      body_url: function () {return body_url;},
-      data:function () {return data;},
-      type:function () {return type;},
-      label:function() {return label;}
+      settings: function () {return {
+        string:settings.string,
+        type:settings.type
+      };},
+      data:function () {return data;}
     }
 
     return $modal.open (c);
   }
-
   return {
-    error: function (body_url, data, config) {
-      return launch(LABELS.error, 'error', body_url, data, config);
+    register : function (id, settings) {
+      REGISTRY[id] = {
+        string: settings.string || '',
+        type: settings.type || 'info'
+      }
     },
-    warning:function (body_url, data, config) {
-      return launch(LABELS.warning, 'warning', body_url, data, config);
-    },
-    info: function (body_url, data, config) {
-      return launch(LABELS.info,'info', body_url, data, config);
-    },
-    success: function (body_url, data, config) {
-      return launch(LABELS.success, 'success', body_url, data, config);
-    },
-    custom : function (label, type, body_url, data, config) {
-      return launch(label, type, body_url, data, config);
+    launch: function (id, data) {
+      return launch(id,data);
     }
   };
-}]);
+}])
+.directive('hersDynamic', function ($compile) {
+  return {
+    restrict: 'A',
+    replace: true,
+    link: function (scope, ele, attrs) {
+      scope.$watch(attrs.hersDynamic, function(html) {
+        ele.html(html);
+        $compile(ele.contents())(scope);
+      });
+    }
+  };
+});
