@@ -73,15 +73,19 @@ factory ('doubleConfirm', [function () {
   }
 
   function DCController ($scope, $modalInstance, data, settings) {
+    settings = angular.extend({}, settings);
     $scope.step = 0;
     $scope.state = null;
     $scope.allow_cancel = true;
+    settings.string = settings.string_map[$scope.step];
+    $scope.settings = settings;
 
     ///pokusaj ovo da provuces zezajuci se sa settings.string ...
     function dodado (state) {
       if ($scope.step === 0) { 
         $scope.step+=1; 
         $scope.state = state;
+        settings.string = settings.string_map[$scope.step];
         return;
       }
 
@@ -116,7 +120,7 @@ factory ('doubleConfirm', [function () {
     var rec = REGISTRY[id];
     if (!rec) return; //za sad?!?! TODO
 
-    var c = angular.extend({}, defaults.get(), settings.modal);
+    var c = angular.extend({}, defaults.get(), rec.modal);
     switch (rec.type) {
       case 'error':
       case 'warning':
@@ -134,20 +138,14 @@ factory ('doubleConfirm', [function () {
     }
 
     c.resolve = {
-      settings: function () {return {
-        string:settings.string,
-        type:settings.type
-      };},
+      settings: function () {return rec;},
       data:function () {return data;}
     }
     return $modal.open (c);
   }
   return {
-    register : function (id, settings) {
-      REGISTRY[id] = {
-        string: settings.string || '',
-        type: settings.type || 'info'
-      }
+    register : function (settings) {
+      REGISTRY[settings.id] = settings;
     },
     launch: function (id, data) {
       return launch(id,data);
