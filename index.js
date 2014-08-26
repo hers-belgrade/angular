@@ -163,4 +163,37 @@ factory ('doubleConfirm', [function () {
       });
     }
   };
+})
+.directive('hersValidatenumber', function () {
+  ///TODO: find a way to create monitor if item has been enabled or not
+  ///TODO: find a way to inject $valid field in angular form system
+  function invalidate(elem) {
+    elem.removeClass('ng-valid ng-valid-number');
+    elem.addClass('ng-invalid ng-invalid-number')
+  }
+
+  function validate(elem) {
+    console.log('should validate');
+    elem.addClass('ng-valid ng-valid-number');
+    elem.removeClass('ng-invalid ng-invalid-number')
+  }
+  return {
+    restrict: 'A',
+    replace: false,
+    link : function ($scope, elem, attrs) {
+      elem.bind('input', function () {
+        var min = isNaN(attrs.min) ? -Infinity : parseFloat(attrs.min);
+        var max = isNaN(attrs.max) ? Infinity : parseFloat(attrs.max);
+
+        var val = elem.val();
+        var valid = false;
+
+        if (val.length && !isNaN(val)) {
+          val = parseInt(val);
+          valid = (val >= min && val <=max);
+        }
+        (valid) ? validate(elem) : invalidate(elem);
+      });
+    }
+  }
 });
